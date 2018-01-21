@@ -11,7 +11,7 @@ function handleAjaxEvent(evento) {
 
 
 $.ajax({
-    url: '',
+    url: '....',
     dataType: "json",
     global: false, /*Impide que se ejecuten los eventos globales de Ajax*/
     beforeSend: handleAjaxEvent('start'),    
@@ -22,3 +22,5 @@ $.ajax({
 .always(function() {
     handleAjaxEvent('stop')
 });
+
+

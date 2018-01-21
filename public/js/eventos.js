@@ -10,12 +10,12 @@ Formularios: submit, change, focus, blur
 Document: load, resize, scroll, unload
 */
 
-var parrafos = $('p');
+var $parrafos = $('p');
 
 // Multiples eventos asociados a un selector
-parrafos.on({
+$parrafos.on({
     mouseover: function(e) {
-        handleEvent(e.data.nombre);
+        handleEvent('mouseover');
     },
     mouseenter: function() {
         handleEvent('mouseenter');
@@ -26,11 +26,25 @@ parrafos.on({
     mouseleave: function() {
         handleEvent('mouseleave');
     },
+    click: function() {
+        handleEvent('click');
+    },
+
 });
 
 function handleEvent(evento) {
     console.log(`${evento} on`);
 }
+
+
+// Pasarle un objeto al manejador del evento cuando se dispara el evento
+// Disparar manualmente el evento click
+$parrafos.on('dblclick', {nombre: 'Rolando'}, function(e) { 
+      console.log(e.data.nombre)
+      $parrafos.trigger("click");
+});
+
+
 
 
 
