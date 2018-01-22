@@ -11,26 +11,42 @@
     FormWizard.prototype = {
      
         default_config : {
+            // Properties
             initial_step: 1,
             steps_number: 1,
             speed_entry_effect: 1500, //ms
+            figure_visibility: true,
+            figure_steps: [],
+            
+            // Events
             onChange: function(){},
             onEntryEffect: function(speed){
                 $(this).fadeIn(speed);
             },
+            onMouseoverFigureStep:  function () {},
+            onMouseoutFigureStep:   function () {},
+            onMouseenterFigureStep: function () {},
+            onMouseleaveFigureStep: function () {},
+            onClickFigureStep: function () {},
+    
         },
         init : function(options) {
             this.config   =  $.extend({}, this.default_config, options);
-            this.$wrappers_container =  this.$item_form.find('div.formWizard-fields');
+            this.$wrappers_container =  this.$item_form.find('div.formWizard-content');
             this.wizard = {
-                current_step : {number: this.config.initial_step, $wrappers: undefined},
+                current_step : {
+                    number: this.config.initial_step, 
+                    $wrappers: undefined,
+                    $figure_step: undefined
+                },
                 move : false
             };
-            this.$visible_wrappers = this.wizard.current_step.$wrappers;
             // Construir los pasos e inicializar el wizard en el paso inicial
             this.$wrappers_container.children().css('display', 'none');
-            this.steps = this.buildSteps();
+            this.steps =  this.buildSteps();
+            this.buildFigure();
             this.changeStep(this.config.initial_step); 
+            
         },
 
         buildSteps: function() {
@@ -56,20 +72,82 @@
                 });
                 if(step_found){
                     this.wizard.current_step = step_found;
-                    this.updateVisibility();
+                    this.updateVisibility(step_found);
+                    this.changeFigureStep(step_found.number);
                     // Establecer el contexto para el callback onChange
-                    this.config.onChange.apply(this.wizard.current_step,
-                        [this.wizard.current_step.$wrappers, this.wizard.current_step.number]);
+                    this.config.onChange.apply(this.wizard.current_step, [step_found.$wrappers, step_found.number]);
                 } 
             }
             
         }, 
 
-        updateVisibility: function(){
-            this.$visible_wrappers = this.wizard.current_step.$wrappers;
+        updateVisibility: function(step_found) {
             this.$wrappers_container.children().css('display', 'none');
-            this.config.onEntryEffect.apply(this.$visible_wrappers, [this.config.speed_entry_effect]);
+            // Establecer el contexto para el callback onEntryEffect
+            this.config.onEntryEffect.apply(step_found.$wrappers, [this.config.speed_entry_effect]);
+        },
+
+        // Figure manage..............................................................................
+        changeFigureStep: function (step_number) {
+            if(step_number >= 1 &&  step_number <= this.config.steps_number && this.config.figure_visibility) {
+                $('ul.wizard-figure > li').removeClass('active');
+                $(`ul.wizard-figure > li:nth-child(${step_number})`).addClass('active');
+                                                                    
+            }
+            
+        },
+       
+        buildFigure: function() {
+            if (this.config.figure_visibility) {
+                var $figure = $('<ul class="wizard-figure"></ul>');
+                if (this.config.figure_steps.length == this.config.steps_number) { 
+                    var figure_steps = this.config.figure_steps;
+                    for (var i = 0; i < figure_steps.length; i++) {
+                        $figure.append(this.buildFigureStep(
+                            figure_steps[i].number || parseInt(i+1), 
+                            figure_steps[i].name || parseInt(i+1), 
+                            figure_steps[i].description || 'Step '+ parseInt(i+1)
+                        ));
+                    }
+                }
+                else {
+                    for (var i = 1; i <= this.config.steps_number; i++) {
+                        $figure.append(this.buildFigureStep(i, i, "Step "+i) );            
+                    }
+                }
+                this.$item_form.prepend($figure);
+                this.onEventsFigureStep();
+            }
+        },
+
+        buildFigureStep: function(number, name, description) {
+              return `
+              <li>
+                  <a>
+                      <span hidden class="step-number">${number}</span>
+                      <span class="step-name">${name}</span>
+                      <span class="step-description">${description}</span>
+                  </a>
+              </li>`;
+        },
+
+         // Figure Events..........................
+        onEventsFigureStep: function () {
+            var $selector = $(`ul.wizard-figure > li > a`);
+            var that = this;
+            return $selector.on({
+                click: function() {
+                    var step_number = parseInt($(this).find('span.step-number').text() || 1);
+                    that.changeStep(step_number);
+                    that.config.onClickFigureStep.apply(this);
+                },          
+            });
+            
         }
+
+       
+
+        
     };
 
     $.fn.formWizard = function(options) { 
@@ -77,65 +155,10 @@
             this.data('formWizard', new FormWizard(this, options))
         }
         else {
-             $.error('Error, Se definió un parámetro incorrecto')
-        }
+          $.error('Error, Se definió un parámetro incorrecto')
+        }     
         return this;    
     }
 
 })(jQuery, window)
 
-
-// Demo
-
-/* Ejemplo para una configuracion por defecto
-var $form = $('#form_test').formWizard();
-*/
-
-// Configuracion personalizada
-var $form = $('#form_test').formWizard({
-    // Propiedades configurables
-    initial_step: 1, 
-    steps_number: 3,
-    speed_entry_effect: 1500,
-
-    // Callbacks configurables
-    onEntryEffect: efectoPersonalizado,
-    onChange: cambioPasoPersonalizado
-});
-
-var wizard = $form.data('formWizard');
-
-
-function cambioPasoPersonalizado($wrappers, step_number){
-     // Acceso al Paso en curso por contexto
-     var step = this;
-     console.log(step.number);
-     $wrappers.css('background-color','gray');
-     
-     // Acceso al Paso en curso por parámetros
-     console.log(step_number);
-     $wrappers.css('color','red');
-}
-
-function efectoPersonalizado(speed){
-    // Acceso a los envoltorios de campos del Paso en curso por contexto
-    var $wrappers  = this;
-    $wrappers.slideDown(speed);
-}
-
-
-// Funciones disponibles
-function anterior(){
-    wizard.previousStep();
-    return false;
-}
-
-function siguiente(){
-    wizard.nextStep();
-    return false;
-}
-
-function cambiarPaso(numero_paso){
-    wizard.changeStep(numero_paso);
-    return false;
-}

@@ -1,0 +1,85 @@
+
+ul.wizard-figure {
+    width: 100%;
+    position: relative;
+    display: table;
+    list-style: none;
+    width: 100%;
+    padding: 0!important;
+    margin: 10!important;
+}
+
+ul.wizard-figure > li{
+    display: table-cell;
+    text-align: center;
+    padding: 0!important;
+    margin: 0!important;
+}
+
+ul.wizard-figure > li > a {
+    display: block;
+    position: relative;
+}
+
+ul.wizard-figure > li > a:hover{
+    text-decoration: none;
+    cursor: pointer;
+}
+
+ul.wizard-figure > li > a .step-name {
+    width: 70px;
+    height: 70px;
+    border-radius: 100px;
+    display: block;
+    margin: 0 auto 5px;
+    font-size: 30px;
+    text-align: center;
+    position: relative;
+    z-index: 5;
+    background-color: white;
+    color: #e0e0e0;
+    line-height: 65px;
+    border: 2px solid #e0e0e0;
+    color:#e0e0e0;
+}
+
+
+
+ul.wizard-figure > li > a .step-description {
+    color: #e0e0e0;
+    font-family: "Helvetica Neue",Roboto,Arial,"Droid Sans",sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.471;
+    border: 0px !important;
+}
+
+ul.wizard-figure > li a::before{
+    height: 2px;
+    background: #e0e0e0;
+    position: absolute;
+    width: 100%;
+    margin: 0 auto;
+    top: 40%;
+    z-index: 4;
+    content: "";
+}
+
+
+ul.wizard-figure > li:first-child a::before {
+    left: 50%;
+}
+
+ul.wizard-figure > li:last-child a::before {
+    right:50%;
+    width:50%;
+}
+
+
+
+
+ul.wizard-figure > li.active a .step-name, ul.wizard-figure > li.active a .step-description {
+    border: 2px solid #5bc0de;
+    color:#5bc0de;
+}
+
